@@ -263,9 +263,9 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
     (options, args) = parser.parse_args()
-    loggerInit(options)
     if options.daemon:
 	daemon.createDaemon()
+    loggerInit(options)
     while True:
 	try:
 	    r=RandomPlayList(doupdate=options.update, doclear=options.clear,
