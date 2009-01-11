@@ -93,20 +93,6 @@ def Print(verb, str):
     if verb <= options.verbose:
         sys.stderr.write(str)
 
-class RetrySenderFetcher(mpdclient2.sender_n_fetcher):
-    def __init__(self, mpdconnection, sender, fetcher):
-	self.mpdconnection = mpdconnection
-	mpdclient2.sender_n_fetcher.__init__(self, sender, fetcher)
-
-    def send_n_fetch(self, cmd, args):
-	res=None
-	while res is None:
-	    try:
-		mpdclient2.sender_n_fetcher.send_n_fetch(self, cmd, args)
-	    except Exception, e:
-		res=None
-		logging.info("Failed to connect to mpd %s" % e)
-		time.sleep(3)
 
 class RetryMPDConnection(mpdclient2.mpd_connection):
     def __init__(self,host,port,password):
@@ -114,25 +100,8 @@ class RetryMPDConnection(mpdclient2.mpd_connection):
 	self.port=port
 	self.password=password
 	mpdclient2.mpd_connection.__init__(self, host, port)
-	#self.do = RetrySenderFetcher(self, self.send, self.fetch)
 	if password != '':
 	    self.password(password)
-
-
-    def x(self, attr):
-	logging.debug("RetryMPDConnection.__getattr__ %s", attr)
-	if mpdclient2.is_command(attr):
-	    res=None
-	    while res is None:
-		try:
-		    res=getattr(self.do, attr)
-		except:
-		    res=None
-		    logging.info("Failed to connect to mpd")
-		    time.sleep(3)
-		    self.__init__(self.host,self.port,self.password)
-	    return res
-	raise AttributeError(attr)
 
 
 class RandomPlayList():
