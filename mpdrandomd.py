@@ -36,6 +36,11 @@ parser.add_option(  "--clear",
                     action="store_const", const=True, dest="clear", 
 		    default=False,
                     help="emtpy mpd database on startup")
+parser.add_option(  "-x", "--exclude-regex",
+                    action="append", type="string", dest="exclude", 
+		    default=[],
+		    metavar="REGEX",
+                    help="Regex against which matching files will be excluded")
 password, host = mpdclient2.parse_host(os.environ.get('MPD_HOST', 'localhost'))
 parser.add_option(  "-H", "--host",
                     action="store", type="string", dest="host", 
@@ -105,10 +110,12 @@ class RetryMPDConnection(mpdclient2.mpd_connection):
 
 
 class RandomPlayList():
-    def __init__(self, nb_keeped=5, nb_queued=2, doupdate=True, doclear=False,  host='localhost', port=6600, passwd='', musicdir="/home/music", mpdconf="/etc/mpd.conf"):
+    def __init__(self, nb_keeped=5, nb_queued=2, doupdate=True, doclear=False,  host='localhost', port=6600, passwd='', musicdir="/home/music", mpdconf="/etc/mpd.conf", exclude=[]):
 	self.mpdconf = mpdconf
 	self.musicdir=self.init_music_dir(musicdir)
-	self.except_re=re.compile(r'Enfants/|soirees/|\.m3u')
+	logging.debug("Exclude regex : %s" % '|'.join(exclude))
+	self.except_re=re.compile('|'.join(exclude))
+	#r'Enfants/|soirees/|\.m3u')
 	self.path_re=re.compile(r'(.*)/[^/]*')
 	self.nb_keeped = nb_keeped
 	self.nb_queued = nb_queued
@@ -265,7 +272,7 @@ def main(argv=None):
 		    nb_keeped=options.keep, nb_queued=options.enqueue,
 		    host=options.host, passwd=options.password,
 		    port=options.port, mpdconf=options.mpdconf,
-		    musicdir=options.musicdir)
+		    musicdir=options.musicdir, exclude=options.exclude)
 	    r.feed_mpd()
 	except Exception,e:
 	    logging.debug(e)
