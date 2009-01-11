@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Contributor : mathieu.clabaut@gmail.com
+# License : GPL v3
 
 import mpdclient2, re, random, sys,os, time
 import logging
