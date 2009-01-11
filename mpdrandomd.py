@@ -213,7 +213,7 @@ class RandomPlayList():
 	    if path is not None:
 		logging.debug("No Random : "+path )
 		album = filter(lambda x: x.file.find(path)==0, self.songs)
-		album.sort(key=lambda x:x.file)
+		album.sort(key=lambda x:x.get('track','')+x.file)
 		logging.debug ("Enqueue one album : %s" % path)
 		for s in album:
 		    self.c.add(s.file)
