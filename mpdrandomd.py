@@ -291,12 +291,6 @@ def main(argv=None):
     if options.daemon:
 	daemon.createDaemon()
     while True:
-	r=RandomPlayList(doupdate=options.update, doclear=options.clear,
-		nb_keeped=options.keep, nb_queued=options.enqueue,
-		 host=options.host,
-		passwd=options.password, port=options.port,
-		mpdconf=options.mpdconf, musicdir=options.musicdir)
-	r.feed_mpd()
 	try:
 	    r=RandomPlayList(doupdate=options.update, doclear=options.clear,
 		    nb_keeped=options.keep, nb_queued=options.enqueue,
