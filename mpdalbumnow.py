@@ -71,7 +71,7 @@ def insertalbum(options):
         path,file=path_re.match(cur.file).group(1,2)
         songs = filter(lambda x: x.type == 'file', c.listallinfo())
         album = filter(lambda x: x.file.find(path) == 0, songs)
-        album.sort(key=lambda x:x.get('track','')+x.file,reverse=True)
+        album.sort(key=lambda x:x.file,reverse=True)
         seen=False
         last=int(c.status().playlistlength)
         for s in album:
