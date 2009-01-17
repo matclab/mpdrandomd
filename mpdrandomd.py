@@ -43,6 +43,10 @@ parser.add_option(  "-x", "--exclude-regex",
 		    default=[],
 		    metavar="REGEX",
                     help="Regex against which matching files will be excluded")
+parser.add_option(  "-e", "--no-equi-album",
+                    action="store_const", const=True, dest="equiproba", 
+		    default=False,
+                    help="Does no correct the probability for album wrt individual songs")
 password, host = mpdclient2.parse_host(os.environ.get('MPD_HOST', 'localhost'))
 parser.add_option(  "-H", "--host",
                     action="store", type="string", dest="host", 
@@ -112,7 +116,7 @@ class RetryMPDConnection(mpdclient2.mpd_connection):
 
 
 class RandomPlayList():
-    def __init__(self, nb_keeped=5, nb_queued=2, doupdate=True, doclear=False,  host='localhost', port=6600, passwd='', musicdir="/home/music", mpdconf="/etc/mpd.conf", exclude=[]):
+    def __init__(self, nb_keeped=5, nb_queued=2, doupdate=True, doclear=False,  host='localhost', port=6600, passwd='', musicdir="/home/music", mpdconf="/etc/mpd.conf", exclude=[], equiproba=True):
 	self.mpdconf = mpdconf
 	self.musicdir=self.init_music_dir(musicdir)
 	logging.debug("Exclude regex : %s" % '|'.join(exclude))
@@ -209,6 +213,21 @@ class RandomPlayList():
 	    choosen = random.randrange(0,nb_songs)
 	return choosen
     
+    def skip_album_by_probablity(self, album_len):
+        """Each album as album_len times more chance to pick up than stand alone songs.
+        This function gives equi-probability between albums and individual
+        songs, by telling if the album should be keep or if another song should
+        be selected"""
+        if not self.equiproba:
+            return True
+        if 1 == random.randrange(1,album_len):
+            return True
+        else:
+            logging.debug("Skip selected album of size %d" % album_len)
+            return False
+
+
+
     def enqueue_one_song_or_album(self):
 	self.pl_songs = filter(lambda x: 'file' in x, self.c.playlistinfo())
 	choosen = self.get_next_song_index()
@@ -218,11 +237,14 @@ class RandomPlayList():
 	    if path is not None:
 		logging.debug("No Random : "+path )
 		album = filter(lambda x: x.file.find(path)==0, self.songs)
+                album_len=len(album)
+                if self.skip_album_by_probablity(album_len):
+                    return self.enqueue_one_song_or_album()
 		album.sort(key=lambda x:x.file)
 		logging.debug ("Enqueue one album : %s" % path)
 		for s in album:
 		    self.c.add(s.file)
-		return len(album)
+		return album_len
 	    else:
 		logging.debug("Enqueue one song : %s" % file)
 		self.c.add(file)
@@ -279,7 +301,8 @@ def main(argv=None):
 		    nb_keeped=options.keep, nb_queued=options.enqueue,
 		    host=options.host, passwd=options.password,
 		    port=options.port, mpdconf=options.mpdconf,
-		    musicdir=options.musicdir, exclude=options.exclude)
+		    musicdir=options.musicdir, exclude=options.exclude,
+                    equiproba=options.equiproba)
 	    r.feed_mpd()
 	except Exception,e:
 	    logging.debug(e)
