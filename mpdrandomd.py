@@ -205,7 +205,7 @@ class RandomPlayList():
 	return choosen
     
     def enqueue_one_song_or_album(self):
-	self.pl_songs = filter(lambda x: x.type == 'file', self.c.playlistinfo())
+	self.pl_songs = filter(lambda x: 'file' in x, self.c.playlistinfo())
 	choosen = self.get_next_song_index()
 	file = self.songs[choosen].file
 	if '/' in file:
@@ -232,7 +232,7 @@ class RandomPlayList():
     def feed_mpd(self):
 	if self.doclear:
 	    self.c.clear()
-	self.songs = filter(lambda x: x.type == 'file', self.c.listallinfo())
+	self.songs = filter(lambda x: 'file' in x, self.c.listallinfo())
 
 	wasplaying = self.c.status().state == 'play'
 
@@ -281,4 +281,4 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit(main())
-# vim : se sw=4 sts=4 et
+# vim: se sw=4 sts=4 et:
