@@ -116,8 +116,6 @@ class RandomPlayList():
 	self.mpdconf = mpdconf
 	self.musicdir=self.init_music_dir(musicdir)
 	logging.debug("Exclude regex : %s" % '|'.join(exclude))
-	self.except_re=re.compile('|'.join(exclude))
-	#r'Enfants/|soirees/|\.m3u')
 	self.path_re=re.compile(r'(.*)/[^/]*')
 	self.nb_keeped = nb_keeped
 	self.nb_queued = nb_queued
@@ -125,6 +123,12 @@ class RandomPlayList():
 	self.c = self.connect(host, port, passwd)
 	if doupdate:
 	    self.update_db()
+        if len(exclude)>0:
+            self.except_re=re.compile('|'.join(exclude))
+        else:
+            self.except_re=re.compile(r'^$')
+
+	#r'Enfants/|soirees/|\.m3u')
 
 	self.c.random(0)
 	#self.c.play()
@@ -199,9 +203,10 @@ class RandomPlayList():
 	# get another song if the random one is in the current playlist or
 	# match except_re
 	while (self.songs[choosen] in self.pl_songs or self.except_re.match(self.songs[choosen].file)):
-	    choosen = random.randrange(0,nb_songs)
 	    if self.except_re.match(self.songs[choosen].file):
 		self.songs.pop(choosen)
+                nb_songs-=1
+	    choosen = random.randrange(0,nb_songs)
 	return choosen
     
     def enqueue_one_song_or_album(self):
