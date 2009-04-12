@@ -214,6 +214,7 @@ class RandomPlayList():
         Be sure it is not already in the playlist and it does not match the
         'exclude' regexp.
         """
+	self.pl_songs = filter(lambda x: 'file' in x, self.c.playlistinfo())
 	nb_songs=len(self.songs)
 	choosen = random.randrange(0,nb_songs)
 	# get another song if the random one is in the current playlist or
@@ -244,7 +245,6 @@ class RandomPlayList():
     def enqueue_one_song_or_album(self):
         """Enqueue a song or the song album if the song belongs to an albow
         marked as 'must not be played randomly'"""
-	self.pl_songs = filter(lambda x: 'file' in x, self.c.playlistinfo())
 	choosen = self.get_next_song_index()
 	file = self.songs[choosen].file
 	if '/' in file:
