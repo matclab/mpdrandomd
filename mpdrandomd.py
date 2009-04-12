@@ -18,7 +18,7 @@ parser = OptionParser( version="0.1",
         "\n\n\tFeed an mpd daemon with a randomize playlist")
 parser.add_option(  "-k", "--keep",
                     action="store", type="int", dest="keep", 
-		    default=100,
+		    default=1000,
 		    metavar="NB",
                     help="how many songs already played are keeped")
 parser.add_option(  "-n", "--enqueue",
