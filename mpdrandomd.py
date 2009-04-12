@@ -166,7 +166,11 @@ class RandomPlayList():
 	return c
 
 
-    def norandom_is_in_path(self, file):
+    def album_path_if_to_be_played_at_once(self, file):
+        """Return the album path of 'file" if the album is to be play
+        continuously (if a file called "norandom" exists in the album
+        directory)
+        """
 	found=False
 	while '/' in file and not found:
 	    file=self.path_re.match(file).group(1)
@@ -185,6 +189,8 @@ class RandomPlayList():
 	logging.info( "Done")
 
     def delete_old_songs(self, pos):
+        """ Remove first playlist songs if playlist size is greater than
+        nb_keeped"""
 	if pos > self.nb_keeped:
 	    logging.debug("Delete first %d songs" % (pos - self.nb_keeped))
 	    for i in xrange(pos - self.nb_keeped, 0, -1):
@@ -192,6 +198,8 @@ class RandomPlayList():
 
 
     def enqueue_new_songs(self, pos, length):
+        """Enqueue enough songs so that there is at least nb_queued songs to be
+        played ahead.  """
 	if length - pos > self.nb_queued:
 	    return
 	to_be_added = self.nb_queued - length + pos + 1
@@ -202,6 +210,10 @@ class RandomPlayList():
 
 
     def get_next_song_index(self):
+        """Choose a song at random.
+        Be sure it is not already in the playlist and it does not match the
+        'exclude' regexp.
+        """
 	nb_songs=len(self.songs)
 	choosen = random.randrange(0,nb_songs)
 	# get another song if the random one is in the current playlist or
@@ -214,7 +226,8 @@ class RandomPlayList():
 	return choosen
     
     def skip_album_by_probablity(self, album_len):
-        """Each album as album_len times more chance to pick up than stand alone songs.
+        """Each album as album_len times more chance to pick up than stand
+        alone songs.
         This function gives equi-probability between albums and individual
         songs, by telling if the album should be keep or if another song should
         be selected"""
@@ -229,11 +242,13 @@ class RandomPlayList():
 
 
     def enqueue_one_song_or_album(self):
+        """Enqueue a song or the song album if the song belongs to an albow
+        marked as 'must not be played randomly'"""
 	self.pl_songs = filter(lambda x: 'file' in x, self.c.playlistinfo())
 	choosen = self.get_next_song_index()
 	file = self.songs[choosen].file
 	if '/' in file:
-	    path = self.norandom_is_in_path(file)
+	    path = self.album_path_if_to_be_played_at_once(file)
 	    if path is not None:
 		logging.debug("No Random : "+path )
 		album = filter(lambda x: x.file.find(path)==0, self.songs)
@@ -256,7 +271,9 @@ class RandomPlayList():
 
 
 
-    def feed_mpd(self):
+    def feed_mpd(self, sleep_time=3):
+        """Feed continuously mpd with new random songs.
+        Wait sleep_time between two calls to enqueue_new_songs."""
 	if self.doclear:
 	    self.c.clear()
 	self.songs = filter(lambda x: 'file' in x, self.c.listallinfo())
@@ -277,7 +294,7 @@ class RandomPlayList():
 	    #curlen = int(self.c.currentsong().time)
 	    #curtime = int(self.c.status().time.split(':')[0])
 	    #sleep(curlen-curtime + 3)
-	    time.sleep(3)
+	    time.sleep(sleep_time)
 
 		
 
