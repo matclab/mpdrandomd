@@ -135,6 +135,7 @@ class RandomPlayList():
 	#r'Enfants/|soirees/|\.m3u')
 
 	self.c.random(0)
+        logging.debug("RandomPlayList initialized")
 	#self.c.play()
 
     def init_music_dir(self, musicdir):
@@ -209,22 +210,25 @@ class RandomPlayList():
 	logging.debug("Enqued %d songs (%d required)" % (added,to_be_added))
 
 
-    def get_next_song_index(self):
+    def get_next_random_song_filename(self):
         """Choose a song at random.
         Be sure it is not already in the playlist and it does not match the
         'exclude' regexp.
+        :returns: chosen file name
         """
-	self.pl_songs = filter(lambda x: 'file' in x, self.c.playlistinfo())
+	pl_files = [ x.file for x in self.c.playlistinfo() if 'file' in x]
 	nb_songs=len(self.songs)
-	choosen = random.randrange(0,nb_songs)
+	chosen_id = random.randrange(0,nb_songs)
+	chosen_file = self.songs[chosen_id].file
 	# get another song if the random one is in the current playlist or
 	# match except_re
-	while (self.songs[choosen] in self.pl_songs or self.except_re.match(self.songs[choosen].file)):
-	    if self.except_re.match(self.songs[choosen].file):
-		self.songs.pop(choosen)
+	while (chosen_file in pl_files or self.except_re.match(chosen_file)):
+
+	    if self.except_re.match(chosen_file):
+		self.songs.pop(chosen_id)
                 nb_songs-=1
-	    choosen = random.randrange(0,nb_songs)
-	return choosen
+	    chosen_id = random.randrange(0,nb_songs)
+	return chosen_file
     
     def skip_album_by_probablity(self, album_len):
         """Each album as album_len times more chance to pick up than stand
@@ -245,8 +249,7 @@ class RandomPlayList():
     def enqueue_one_song_or_album(self):
         """Enqueue a song or the song album if the song belongs to an albow
         marked as 'must not be played randomly'"""
-	choosen = self.get_next_song_index()
-	file = self.songs[choosen].file
+	file = self.get_next_random_song_filename()
 	if '/' in file:
 	    path = self.album_path_if_to_be_played_at_once(file)
 	    if path is not None:
@@ -314,6 +317,7 @@ def main(argv=None):
     loggerInit(options)
     while True:
 	try:
+            logging.debug("Creating RandomPlayList")
 	    r=RandomPlayList(doupdate=options.update, doclear=options.clear,
 		    nb_keeped=options.keep, nb_queued=options.enqueue,
 		    host=options.host, passwd=options.password,
