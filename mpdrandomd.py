@@ -228,6 +228,7 @@ class RandomPlayList():
 		self.songs.pop(chosen_id)
                 nb_songs-=1
 	    chosen_id = random.randrange(0,nb_songs)
+            chosen_file = self.songs[chosen_id].file
 	return chosen_file
     
     def skip_album_by_probablity(self, album_len):
