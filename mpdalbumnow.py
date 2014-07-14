@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # Contributor : mathieu.clabaut@gmail.com
 # License : GPL v3
 
