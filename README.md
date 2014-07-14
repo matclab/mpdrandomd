@@ -18,6 +18,7 @@ from git : `https://github.com/matclab/mpdrandomd.git`)
 
 
 ## Usage ##
+```
    Usage: mpdrandomd.py [options]
 
       Feed an mpd daemon with a randomize playlist
@@ -43,7 +44,7 @@ from git : `https://github.com/matclab/mpdrandomd.git`)
    -d, --debug           output debug information to stderr
    -l FILE, --log-file=FILE
                          log file (default /tmp/mpdrandomd.log, '-' for stderr)
-
+```
 
 ## Author ##
 mathieu.clabaut@gmail.com
