@@ -14,7 +14,7 @@ Depends on python2 and python-mpdclient2 library.
 
 Can be download there http://bitbucket.org/matclab/mpdrandomd/src/ (or cloned
 with mercurial : `hg clone https://bitbucket.org/matclab/mpdrandomd/` or cloned
-from git : `https://github.com/matclab/mpdrandomd.git`)
+with git : `git clone https://github.com/matclab/mpdrandomd.git`)
 
 
 ## Usage ##
@@ -46,5 +46,11 @@ from git : `https://github.com/matclab/mpdrandomd.git`)
                          log file (default /tmp/mpdrandomd.log, '-' for stderr)
 ```
 
+## Issues ##
+
+Issues may be reported on github [issue
+tracker](https://github.com/matclab/mpdrandomd/issues).
+
 ## Author ##
+
 mathieu.clabaut@gmail.com
