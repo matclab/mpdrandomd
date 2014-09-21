@@ -8,7 +8,7 @@ with the end of the album.
 
 ## Requirements ##
 
-Depends on python2 and python-mpdclient2 library.
+Depends on python2, python daemon package and python-mpdclient2 library.
 
 ## Install ##
 

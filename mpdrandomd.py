@@ -6,6 +6,7 @@ import mpdclient2, re, random, sys,os, time
 import logging
 from optparse import OptionParser
 import daemon
+import daemon.pidfile
 
 try:
     import optcomplete
@@ -73,6 +74,7 @@ parser.add_option(  "-c","--mpd-conf",
 		    default="/etc/mpd.conf",
 		    metavar="FILE",
                     help="MPD conf file (default /etc/mpd.conf")
+parser.add_option(  "--pid-file", default="/var/run/mpdrandom.pid")
 parser.set_defaults(verbose=logging.WARNING)
 parser.add_option("-q", "--quiet",
                     action="store_const", const=logging.CRITICAL, dest="verbose", 
@@ -302,19 +304,7 @@ class RandomPlayList():
 
 		
 
-
-
-class UsageError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-def main(argv=None):
-    global options
-    if argv is None:
-        argv = sys.argv
-    (options, args) = parser.parse_args()
-    if options.daemon:
-	daemon.createDaemon()
+def main_loop(options):
     loggerInit(options)
     while True:
 	try:
@@ -328,6 +318,24 @@ def main(argv=None):
 	    r.feed_mpd()
 	except Exception,e:
 	    logging.debug(e)
+
+class UsageError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+def main(argv=None):
+    global options
+    if argv is None:
+        argv = sys.argv
+    (options, args) = parser.parse_args()
+    if options.daemon:
+        pidfile = daemon.pidfile.PIDLockFile(options.pid_file)
+        print pidfile
+        with daemon.DaemonContext(pidfile=pidfile, stdout=sys.stdout):
+            print "in"
+            main_loop(options)
+    else:
+        main_loop(options)
 
 if __name__ == "__main__":
     sys.exit(main())
