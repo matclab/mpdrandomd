@@ -283,7 +283,6 @@ class RandomPlayList():
         Wait sleep_time between two calls to enqueue_new_songs."""
         if self.doclear:
             self.c.clear()
-        #self.songs = filter(lambda x: 'file' in x, self.c.listallinfo())
         self.songs = self.c.search("file", "local:")
 
         wasplaying = self.c.status().state == 'play'

@@ -69,7 +69,7 @@ def insertalbum(options):
     if '/' in cur.file:
         path_re=re.compile(r'^(.*)/([^/]*)$')
         path,file=path_re.match(cur.file).group(1,2)
-        songs = filter(lambda x: 'file' in x, c.listallinfo())
+        songs = c.search("file", "local:")
         album = filter(lambda x: x.file.find(path) == 0, songs)
         album.sort(key=lambda x:x.file,reverse=True)
         seen=False
