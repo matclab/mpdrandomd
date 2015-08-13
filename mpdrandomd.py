@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# -*- coding: UTF-8 -*-
 # Contributor : mathieu.clabaut@gmail.com
 # License : GPL v3
 
@@ -116,7 +117,9 @@ class RetryMPDConnection(mpdclient2.mpd_connection):
 
 
 class RandomPlayList():
-    def __init__(self, nb_keeped=5, nb_queued=2, doupdate=True, doclear=False,  host='localhost', port=6600, passwd='', musicdir="/home/music", mpdconf="/etc/mpd.conf", exclude=[], equiproba=True):
+    def __init__(self, nb_keeped=5, nb_queued=2, doupdate=True, doclear=False,
+            host='localhost', port=6600, passwd='', musicdir=u"/home/music",
+            mpdconf=u"/etc/mpd.conf", exclude=[], equiproba=True):
         self.mpdconf = mpdconf
         self.musicdir=self.init_music_dir(musicdir)
         logging.debug("Exclude regex : %s" % '|'.join(exclude))
@@ -140,7 +143,7 @@ class RandomPlayList():
 
     def init_music_dir(self, musicdir):
         if musicdir is None:
-            re_musicdir=re.compile(r"""^\s*music_directory\s*["']([^"']*)["']""")
+            re_musicdir=re.compile(ur"""^\s*music_directory\s*["']([^"']*)["']""")
             res=None
             with open(self.mpdconf, 'r') as f: 
                 for line in f:
@@ -223,6 +226,7 @@ class RandomPlayList():
         nb_songs=len(self.songs)
         chosen_id = random.randrange(0,nb_songs)
         chosen_file = self.songs[chosen_id].file
+        logging.debug("chosen %d %s" % (chosen_id, chosen_file))
         # get another song if the random one is in the current playlist or
         # match except_re
         while (chosen_file in pl_files or self.except_re.search(chosen_file)):
@@ -232,6 +236,7 @@ class RandomPlayList():
                 nb_songs-=1
             chosen_id = random.randrange(0,nb_songs)
             chosen_file = self.songs[chosen_id].file
+            logging.debug("chosen %d %s" % (chosen_id, chosen_file))
         return chosen_file
     
     def skip_album_by_probablity(self, album_len):
@@ -283,7 +288,15 @@ class RandomPlayList():
         Wait sleep_time between two calls to enqueue_new_songs."""
         if self.doclear:
             self.c.clear()
-        self.songs = self.c.search("file", "local:")
+        self.songs = []
+        for root, dirs, files in os.walk(self.musicdir):
+            for f in files:
+                if not f.endswith('.m3u'):
+                    logging.debug("searching for %s" % f)
+                    s = self.c.search("file", f)
+                    if s:
+                        self.songs.append(s[0])
+        logging.info("%d songs in %s" % (len(self.songs), self.musicdir))
 
         wasplaying = self.c.status().state == 'play'
 
@@ -331,6 +344,7 @@ def main(argv=None):
             r.feed_mpd()
         except Exception,e:
             logging.debug(e)
+            raise e
 
 if __name__ == "__main__":
     sys.exit(main())
